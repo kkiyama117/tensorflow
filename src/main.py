@@ -67,4 +67,4 @@ with tf.Session() as session:
         if step % 10 == 0:
             acc_val = session.run(accuracy,
                                   feed_dict={x: test_images, y: test_labels})
-            print("STEP %d: accuracy = %.2f" % (step, acc_val))
+            print("STEP %d: accuracy = %.3f" % (step, acc_val))
