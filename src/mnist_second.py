@@ -9,28 +9,26 @@ def mnist_test():
     x = tf.placeholder(tf.float32, [None, 784])
     # 入力画像のログを定義
     img = tf.reshape(x, [-1, 28, 28, 1])
-    tf.summary.image("input_data", img, 10)
 
-    with tf.name_scope("hidden"):
-        # 入力層 -> 畳み込み層
-        # フィルタ1
-        f1 = tf.Variable(tf.truncated_normal([5, 5, 1, 32], stddev=0.1))
-        conv1 = tf.nn.conv2d(img, f1, strides=[1, 1, 1, 1], padding="SAME")
-        b1 = tf.Variable(tf.constant(0.1, shape=[32]))
-        h_conv1 = tf.nn.relu(conv1 + b1)
-        # プーリング層1
-        h_pool1 = tf.nn.max_pool(h_conv1, ksize=[1, 2, 2, 1],
-                                 strides=[1, 2, 2, 1], padding="SAME")
+    # 入力層 -> 畳み込み層
+    # フィルタ1
+    f1 = tf.Variable(tf.truncated_normal([5, 5, 1, 32], stddev=0.1))
+    conv1 = tf.nn.conv2d(img, f1, strides=[1, 1, 1, 1], padding="SAME")
+    b1 = tf.Variable(tf.constant(0.1, shape=[32]))
+    h_conv1 = tf.nn.relu(conv1 + b1)
+    # プーリング層1
+    h_pool1 = tf.nn.max_pool(h_conv1, ksize=[1, 2, 2, 1],
+                             strides=[1, 2, 2, 1], padding="SAME")
 
-    with tf.name_scope("output"):
-        # 畳み込み層2
-        f2 = tf.Variable(tf.truncated_normal([5, 5, 32, 64], stddev=0.1))
-        conv2 = tf.nn.conv2d(h_pool1, f2, strides=[1, 1, 1, 1], padding="SAME")
-        b2 = tf.Variable(tf.constant(0.1, shape=[64]))
-        h_conv2 = tf.nn.relu(conv2 + b2)
-        # プーリング2
-        h_pool2 = tf.nn.max_pool(h_conv2, ksize=[1, 2, 2, 1],
-                                 strides=[1, 2, 2, 1], padding="SAME")
+    # 畳み込み層2
+    f2 = tf.Variable(tf.truncated_normal([5, 5, 32, 64], stddev=0.1))
+
+    conv2 = tf.nn.conv2d(h_pool1, f2, strides=[1, 1, 1, 1], padding="SAME")
+    b2 = tf.Variable(tf.constant(0.1, shape=[64]))
+    h_conv2 = tf.nn.relu(conv2 + b2)
+    # プーリング2
+    h_pool2 = tf.nn.max_pool(h_conv2, ksize=[1, 2, 2, 1],
+                             strides=[1, 2, 2, 1], padding="SAME")
 
     # 畳み込みをフラットに変換
     h_pool2_flat = tf.reshape(h_pool2, [-1, 7 * 7 * 64])
@@ -45,31 +43,26 @@ def mnist_test():
     out = tf.nn.softmax(tf.matmul(h_fc1, w_fc2) + b_fc2)
     # 誤差を測定
     y = tf.placeholder(tf.float32, [None, 10])
-    with tf.name_scope("loss"):
-        # 誤差関数
-        # クロスエントロピー
-        loss = tf.reduce_mean(tf.reduce_sum(y * tf.log(out + 1e-5), axis=[1]))
+    # 誤差関数
+    # クロスエントロピー
+    loss = tf.reduce_mean(tf.reduce_sum(y * tf.log(out + 1e-5), axis=[1]))
 
     # 訓練
-    with tf.name_scope("train"):
-        # 確率的勾配降下法
-        # 引数は学習率
-        # minimizeでアップデート
-        # minimize = compute_gradients -> apply_gradients
-        train_step = tf.train.GradientDescentOptimizer(0.01).minimize(loss)
+    # 確率的勾配降下法
+    # 引数は学習率
+    # minimizeでアップデート
+    # minimize = compute_gradients -> apply_gradients
+    train_step = tf.train.GradientDescentOptimizer(0.01).minimize(loss)
 
     # 評価
-    with tf.name_scope("accuracy"):
-        # 第二引数 は reduce_mean 同様軸方向
-        # 1 -> 行方向
-        # 結果はバッチサイズと等しい一階テンソル
-        correct = tf.equal(tf.argmax(out, 1), tf.argmax(y, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct, tf.float32))
+    # 第二引数 は reduce_mean 同様軸方向
+    # 1 -> 行方向
+    # 結果はバッチサイズと等しい一階テンソル
+    correct = tf.equal(tf.argmax(out, 1), tf.argmax(y, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct, tf.float32))
 
     # init
     init = tf.global_variables_initializer()
-
-    # logging
 
     # RUN
     with tf.Session() as session:
