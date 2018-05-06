@@ -52,7 +52,7 @@ def mnist_test():
     # 引数は学習率
     # minimizeでアップデート
     # minimize = compute_gradients -> apply_gradients
-    train_step = tf.train.GradientDescentOptimizer(0.01).minimize(loss)
+    train_step = tf.train.GradientDescentOptimizer(0.1).minimize(loss)
 
     # 評価
     # 第二引数 は reduce_mean 同様軸方向
